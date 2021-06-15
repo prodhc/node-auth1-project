@@ -1,3 +1,5 @@
+const User = require('../users/users-model')
+
 /*
   If the user does not have a session saved in the server
 
@@ -20,7 +22,17 @@ function restricted(req, res, next) {
   }
 */
 function checkUsernameFree(req, res, next) {
-  next() 
+  try {
+    const users = User.findBy({ username: req.body.username})
+    if (!users.length) {
+      next()
+    }
+    else {
+      next({  message: "Username taken", status: 422 })
+  }
+  } catch (err) {
+    next(err)
+  }
 }
 
 /*
@@ -32,7 +44,17 @@ function checkUsernameFree(req, res, next) {
   }
 */
 function checkUsernameExists(req, res, next) {
-  next() 
+  try {
+    const users = User.findBy({ username: req.body.username})
+    if (users.length) {
+      next()
+    }
+    else {
+      next({  message: "Username taken", status: 401 })
+  }
+  } catch (err) {
+    next(err)
+  } 
 }
 
 /*
@@ -44,7 +66,12 @@ function checkUsernameExists(req, res, next) {
   }
 */
 function checkPasswordLength(req, res, next) {
-  next() 
+  if (!req.body.password || req.body.password.length < 3) {
+    next({message: "Password must be longer than 3 chars", status: 422})
+  }
+  else {
+    next()
+  }
 }
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
